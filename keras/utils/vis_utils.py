@@ -81,8 +81,21 @@ def model_to_dot(model,
         else:
             label = class_name
 
-        # Rebuild the label as a table including input/output shapes.
+        # Rebuild the label as a table including input/output and weight shapes.
         if show_shapes:
+            # Compute the shape of the weights
+            weight_shape = []
+            if hasattr(layer, 'get_weights'):
+                weight_shapes = [l.shape for l in layer.get_weights()]
+                sumparams = 0
+                for n,shapes in enumerate(weight_shapes):
+                    prod = 1
+                    for s in shapes:
+                        prod *= s
+                    sumparams += prod
+                # Append the weight shape and number of parameters to the layer label.
+                weight_shape_txt = str(weight_shapes) + " (" + str(sumparams) + ")"
+                label = label + "\n" + weight_shape_txt
             try:
                 outputlabels = str(layer.output_shape)
             except AttributeError:
